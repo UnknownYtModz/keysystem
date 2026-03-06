@@ -45,14 +45,15 @@
     }
 
     function processKey() {
-        // 2. GET USERID FROM URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const userId = urlParams.get('hwid'); // We use 'hwid' as a label to hide that it's a UserID
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('hwid'); 
 
-        if (!userId) {
-            alert("Error: Missing Session Data. Please restart script.");
-            return;
-        }
+    if (!userId) {
+        // If they try to bypass, show the error
+        document.getElementById('errorMsg').style.display = "block";
+        document.getElementById('genBtn').style.display = "none";
+        return;
+    }
 
         const dayStamp = Math.floor(Date.now() / 86400000);
         let seed = parseInt(userId) + dayStamp;
