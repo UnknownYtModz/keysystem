@@ -3,150 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unknown Modz | Secure Gateway</title>
+    <title>Unknown Modz | Authentication</title>
     <style>
-        :root {
-            --accent: #00ff00;
-            --bg: #0a0a0a;
-            --card: #151515;
-            --text: #ffffff;
-            --gray: #888888;
-        }
-
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-        }
-
-        /* Animated Background Sparkles */
-        body::before {
-            content: "";
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background-image: radial-gradient(var(--accent) 1px, transparent 1px);
-            background-size: 50px 50px;
-            opacity: 0.05;
-            z-index: -1;
-        }
-
-        .container {
-            background-color: var(--card);
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 0 40px rgba(0, 255, 0, 0.1);
-            border: 1px solid #222;
-            text-align: center;
-            width: 90%;
-            max-width: 400px;
-            transition: 0.3s;
-        }
-
-        h1 {
-            font-size: 24px;
-            letter-spacing: 2px;
-            margin-bottom: 5px;
-            color: var(--accent);
-            text-transform: uppercase;
-        }
-
-        p {
-            color: var(--gray);
-            font-size: 13px;
-            margin-bottom: 25px;
-        }
-
-        .input-group { margin-bottom: 20px; text-align: left; }
-        label { font-size: 11px; color: var(--accent); text-transform: uppercase; margin-left: 5px; }
-
-        input {
-            width: 100%;
-            padding: 14px;
-            margin-top: 5px;
-            border-radius: 10px;
-            border: 1px solid #333;
-            background: #111;
-            color: white;
-            outline: none;
-            box-sizing: border-box;
-            font-size: 16px;
-            transition: 0.3s;
-        }
-
-        input:focus { border-color: var(--accent); box-shadow: 0 0 10px rgba(0, 255, 0, 0.2); }
-
-        button {
-            width: 100%;
-            padding: 15px;
-            background-color: var(--accent);
-            color: black;
-            border: none;
-            border-radius: 10px;
-            font-weight: 800;
-            cursor: pointer;
-            transition: 0.3s;
-            text-transform: uppercase;
-            font-size: 14px;
-        }
-
-        button:hover {
-            background-color: #00cc00;
-            transform: scale(1.02);
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.4);
-        }
-
-        #result {
-            margin-top: 30px;
-            padding: 20px;
-            background: #000;
-            border-radius: 12px;
-            border: 1px dashed var(--accent);
-            display: none;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .key-value {
-            font-family: 'Courier New', monospace;
-            font-size: 16px;
-            color: var(--accent);
-            font-weight: bold;
-            word-break: break-all;
-        }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        :root { --accent: #00ff00; --bg: #0a0a0a; --card: #151515; }
+        body { background-color: var(--bg); color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: var(--card); padding: 40px; border-radius: 20px; border: 1px solid #222; text-align: center; width: 90%; max-width: 400px; }
+        h1 { color: var(--accent); text-transform: uppercase; letter-spacing: 2px; }
+        .key-box { background: #000; padding: 15px; border-radius: 10px; border: 1px dashed var(--accent); margin-top: 20px; display: none; }
+        .key-text { font-family: monospace; color: var(--accent); font-size: 18px; font-weight: bold; }
+        .error { color: #ff4444; font-weight: bold; display: none; }
+        button { width: 100%; padding: 15px; background: var(--accent); color: black; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
+        button:disabled { background: #333; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div class="container" id="mainContent">
     <h1>Unknown Modz</h1>
-    <p>Security Verification Gateway</p>
+    <p id="statusMsg">Verify your session to generate key.</p>
     
-    <div class="input-group">
-        <label>Roblox UserID</label>
-        <input type="number" id="userIdInput" placeholder="Enter ID to authenticate">
-    </div>
+    <div id="errorMsg" class="error">⚠️ NO BYPASSING ALLOWED<br><small>You must go through the official link.</small></div>
 
-    <button onclick="generateKey()">Generate Access Key</button>
+    <button id="genBtn" onclick="processKey()">Get My Key</button>
 
-    <div id="result">
-        <div style="font-size: 10px; color: #555; margin-bottom: 8px;">ENCRYPTED KEY (VALID 24H)</div>
-        <div id="keyValue" class="key-value"></div>
-        <button onclick="copyKey()" style="margin-top:15px; padding: 8px; font-size: 10px; background: #222; color: white;">Copy Key</button>
+    <div id="resultBox" class="key-box">
+        <div style="font-size: 10px; color: #888; margin-bottom: 5px;">YOUR UNIQUE 24H KEY:</div>
+        <div id="keyValue" class="key-text"></div>
     </div>
 </div>
 
 <script>
-    function generateKey() {
-        const userId = document.getElementById('userIdInput').value;
-        if (!userId) return alert("Please enter a valid UserID");
+    // 1. SECURITY CHECK: Check if the user came from your redirect link
+    // Note: document.referrer checks where the user clicked from.
+    const validReferrer = "alvinchristian1118-code.github.io"; 
+    const isDirect = document.referrer === "" || !document.referrer.includes(validReferrer);
+
+    if (isDirect) {
+        document.getElementById('genBtn').disabled = true;
+        document.getElementById('statusMsg').style.display = "none";
+        document.getElementById('errorMsg').style.display = "block";
+    }
+
+    function processKey() {
+        // 2. GET USERID FROM URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('hwid'); // We use 'hwid' as a label to hide that it's a UserID
+
+        if (!userId) {
+            alert("Error: Missing Session Data. Please restart script.");
+            return;
+        }
 
         const dayStamp = Math.floor(Date.now() / 86400000);
         let seed = parseInt(userId) + dayStamp;
@@ -156,28 +62,17 @@
             return x - Math.floor(x);
         }
 
-        let keyParts = [];
+        let parts = [];
         for (let i = 0; i < 4; i++) {
-            let segment = "";
-            for (let j = 0; j < 4; j++) {
-                segment += Math.floor(seededRandom() * 10);
-            }
-            keyParts.push(segment);
+            let seg = "";
+            for (let j = 0; j < 4; j++) { seg += Math.floor(seededRandom() * 10); }
+            parts.push(seg);
         }
 
-        // Added your branding to the key
-        const finalKey = "Unknown-Modz-" + keyParts.join("-");
-        
-        document.getElementById('keyValue').innerText = finalKey;
-        document.getElementById('result').style.display = "block";
-    }
-
-    function copyKey() {
-        const text = document.getElementById('keyValue').innerText;
-        navigator.clipboard.writeText(text);
-        alert("Key copied to clipboard!");
+        document.getElementById('keyValue').innerText = "Unknown-Modz-" + parts.join("-");
+        document.getElementById('resultBox').style.display = "block";
+        document.getElementById('genBtn').style.display = "none";
     }
 </script>
-
 </body>
 </html>
