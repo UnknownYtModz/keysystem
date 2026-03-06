@@ -3,71 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unknown Modz | Secure Gateway</title>
+    <title>Unknown Modz | Key System</title>
     <style>
         :root { --accent: #00ff00; --bg: #0a0a0a; --card: #151515; }
         body { background-color: var(--bg); color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { background: var(--card); padding: 40px; border-radius: 20px; border: 1px solid #222; text-align: center; width: 90%; max-width: 400px; }
+        .container { background: var(--card); padding: 40px; border-radius: 20px; border: 1px solid #222; text-align: center; width: 90%; max-width: 400px; box-shadow: 0 0 20px rgba(0,255,0,0.1); }
         h1 { color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin: 0; }
-        p { color: #888; font-size: 14px; margin-bottom: 20px; }
+        p { color: #888; font-size: 14px; margin-bottom: 25px; }
         #result { background: #000; padding: 15px; border-radius: 10px; border: 1px dashed var(--accent); margin-top: 20px; display: none; }
         .key-text { font-family: monospace; color: var(--accent); font-size: 18px; font-weight: bold; }
         .error { color: #ff4444; font-weight: bold; display: none; padding: 20px; }
-        button { width: 100%; padding: 15px; background: var(--accent); color: black; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase; margin-top: 10px; transition: 0.3s; }
+        button { width: 100%; padding: 15px; background: var(--accent); color: black; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
         button:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(0,255,0,0.3); }
     </style>
 </head>
 <body>
-
-<div class="container">
-    <h1>Unknown Modz</h1>
-    <div id="content">
-        <p>Click below to generate your unique 24h access key.</p>
-        <button onclick="generateKey()">Generate Key</button>
+    <div class="container">
+        <h1>Unknown Modz</h1>
+        <div id="content">
+            <p>Verification successful! Click below to generate your unique 24h key.</p>
+            <button onclick="generateKey()">Generate Key</button>
+        </div>
+        <div id="errorBox" class="error">⚠️ BYPASS DETECTED<br><small>Please use the link from the script.</small></div>
+        <div id="result">
+            <div style="font-size: 10px; color: #888; margin-bottom: 5px;">YOUR 24H KEY:</div>
+            <div id="keyValue" class="key-text"></div>
+            <p style="font-size: 10px; margin-top: 10px;">Copy and paste this into the loader.</p>
+        </div>
     </div>
-
-    <div id="errorBox" class="error">
-        ⚠️ ACCESS DENIED<br>
-        <small>Bypass detected. Please get the link from the script.</small>
-    </div>
-
-    <div id="result">
-        <div style="font-size: 10px; color: #888; margin-bottom: 5px;">YOUR 24H KEY:</div>
-        <div id="keyValue" class="key-text"></div>
-        <p style="font-size: 10px; margin-top: 10px;">Copy this into the script loader.</p>
-    </div>
-</div>
-
-<script>
-    function generateKey() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const userId = urlParams.get('id'); // Looks for ?id=123456
-
-        if (!userId || userId === "") {
+    <script>
+        function generateKey() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const userId = urlParams.get('id'); 
+            if (!userId) {
+                document.getElementById('content').style.display = "none";
+                document.getElementById('errorBox').style.display = "block";
+                return;
+            }
+            const dayStamp = Math.floor(Date.now() / 86400000);
+            let seed = parseInt(userId) + dayStamp;
+            function seededRandom() { var x = Math.sin(seed++) * 10000; return x - Math.floor(x); }
+            let parts = [];
+            for (let i = 0; i < 4; i++) {
+                let seg = "";
+                for (let j = 0; j < 4; j++) { seg += Math.floor(seededRandom() * 10); }
+                parts.push(seg);
+            }
+            document.getElementById('keyValue').innerText = "Unknown-Modz-" + parts.join("-");
+            document.getElementById('result').style.display = "block";
             document.getElementById('content').style.display = "none";
-            document.getElementById('errorBox').style.display = "block";
-            return;
         }
-
-        const dayStamp = Math.floor(Date.now() / 86400000);
-        let seed = parseInt(userId) + dayStamp;
-
-        function seededRandom() {
-            var x = Math.sin(seed++) * 10000;
-            return x - Math.floor(x);
-        }
-
-        let parts = [];
-        for (let i = 0; i < 4; i++) {
-            let seg = "";
-            for (let j = 0; j < 4; j++) { seg += Math.floor(seededRandom() * 10); }
-            parts.push(seg);
-        }
-
-        document.getElementById('keyValue').innerText = "Unknown-Modz-" + parts.join("-");
-        document.getElementById('result').style.display = "block";
-        document.getElementById('content').style.display = "none";
-    }
-</script>
+    </script>
 </body>
 </html>
